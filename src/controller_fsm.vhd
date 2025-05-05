@@ -39,7 +39,44 @@ end controller_fsm;
 
 architecture FSM of controller_fsm is
 
-begin
+    type sm_state is (state0, state1, state2, state3);
+
+    signal f_Q, f_Q_next : sm_state;
+    
+    begin
+
+        --f_Q_next <= state1 when ((f_Q = state0) and (i_adv = '1')) else
+        --            state2 when ((f_Q = state1) and (i_adv = '1')) else
+        --            state3 when ((f_Q = state2) and (i_adv = '1')) else
+        --            state0 when ((f_Q = state3) and (i_adv = '1')) else
+        --            f_Q;
+                    
+        f_Q_next <= state1 when (f_Q = state0) else
+                    state2 when (f_Q = state1) else
+                    state3 when (f_Q = state2) else
+                    state0 when (f_Q = state3) else
+                    f_Q;
+                    
+        with f_Q select
+            o_cycle <= "1000" when state0,
+                       "0100" when state1,
+                       "0010" when state2,
+                       "0001" when state3;
+            
+        
 
 
-end FSM;
+
+    state_register : process(i_adv)
+	begin
+        if rising_edge(i_adv) then
+           if i_reset = '1' then
+               f_Q <= state0;
+           else
+                f_Q <= f_Q_next;
+            end if;
+        end if;
+	end process state_register;
+
+
+    end FSM;
